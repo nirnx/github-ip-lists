@@ -47,7 +47,13 @@ jobs:
           git add lists/
           if git diff --cached --quiet; then
             echo "No changes."
-          else
-            git commit -m "chore: refresh GitHub meta IP lists"
-            git push
+            exit 0
           fi
+          git commit -m "chore: refresh GitHub meta IP lists"
+          for i in 1 2 3; do
+            git pull --rebase origin main && git push && exit 0
+            echo "Push attempt $i failed, retrying..."
+            sleep $((i * 5))
+          done
+          echo "Push failed after retries." >&2
+          exit 1
